@@ -3,838 +3,917 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MirrorYou — AI Presentation Coach · Coming Soon</title>
-  <meta name="description" content="MirrorYou is an AI-powered presentation coach that analyzes verbal and non-verbal communication in real time. Launching Summer 2026." />
+  <title>MirrorYou — Your Honest Speaking Mirror That Teaches</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
   <style>
-/* ═══════════════════════════════════════════
-   RESET
-═══════════════════════════════════════════ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+    :root {
+      --bg-deep: #0d0d0d;
+      --bg-dark: #1a0a0a;
+      --accent: #e94560;
+      --accent-dim: rgba(233, 69, 96, 0.15);
+      --accent-glow: rgba(233, 69, 96, 0.4);
+      --card-bg: rgba(255, 255, 255, 0.96);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-white: #f5f5f5;
+      --text-muted: rgba(245, 245, 245, 0.55);
+      --text-dark: #1a1a1a;
+      --text-dark-muted: #555;
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
 
-/* ═══════════════════════════════════════════
-   DESIGN TOKENS
-═══════════════════════════════════════════ */
-:root {
-  --bg-top:          #1a0a0a;
-  --bg-bot:          #0d0d0d;
-  --accent:          #e94560;
-  --accent-mid:      rgba(233,69,96,0.22);
-  --accent-glow:     rgba(233,69,96,0.42);
-  --accent-subtle:   rgba(233,69,96,0.08);
-  --glass:           rgba(255,255,255,0.055);
-  --glass-border:    rgba(255,255,255,0.10);
-  --card-bg:         rgba(255,255,255,0.962);
-  --text:            #f0e8e8;
-  --text-muted:      #8a7a82;
-  --card-text:       #1c1018;
-  --card-muted:      #6b5b65;
-  --radius-card:     18px;
-  --radius-sm:       10px;
-  --font:            'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --shadow-card:     0 6px 36px rgba(0,0,0,0.55);
-  --shadow-lift:     0 22px 60px rgba(0,0,0,0.75);
-  --transition:      0.28s cubic-bezier(0.25,0.8,0.25,1);
-}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ═══════════════════════════════════════════
-   BASE
-═══════════════════════════════════════════ */
-body {
-  font-family: var(--font);
-  background: linear-gradient(160deg, var(--bg-top) 0%, #110808 50%, var(--bg-bot) 100%);
-  min-height: 100vh;
-  color: var(--text);
-  overflow-x: hidden;
-}
+    html { scroll-behavior: smooth; }
 
-/* ═══════════════════════════════════════════
-   AMBIENT BACKGROUND LAYER
-═══════════════════════════════════════════ */
-#ambient {
-  position: fixed; inset: 0; z-index: 0;
-  pointer-events: none; overflow: hidden;
-}
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-deep);
+      color: var(--text-white);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
 
-/* Subtle dot grid */
-#ambient::before {
-  content: '';
-  position: absolute; inset: 0;
-  background-image: radial-gradient(rgba(233,69,96,0.10) 1px, transparent 1px);
-  background-size: 40px 40px;
-  mask-image: radial-gradient(ellipse 75% 75% at 50% 35%, black 10%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 75% 75% at 50% 35%, black 10%, transparent 100%);
-}
+    /* ─── NOISE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
 
-/* Diagonal scan line texture */
-#ambient::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(
-    -45deg,
-    transparent,
-    transparent 3px,
-    rgba(0,0,0,0.04) 3px,
-    rgba(0,0,0,0.04) 4px
-  );
-  opacity: 0.6;
-}
+    /* ─── GRADIENT BG ─── */
+    .bg-gradient {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(233,69,96,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(233,69,96,0.12) 0%, transparent 60%),
+        linear-gradient(160deg, #1a0a0a 0%, #0d0d0d 60%, #0a0505 100%);
+      z-index: -1;
+    }
 
-/* Glow orbs */
-.orb {
-  position: absolute; border-radius: 50%;
-  filter: blur(100px); pointer-events: none;
-  animation: float 24s ease-in-out infinite alternate;
-}
-.orb-1 {
-  width: 700px; height: 700px;
-  background: radial-gradient(circle, rgba(233,69,96,0.12) 0%, transparent 65%);
-  top: -250px; right: -200px; animation-delay: 0s;
-}
-.orb-2 {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(120,10,30,0.22) 0%, transparent 65%);
-  bottom: 10%; left: -160px; animation-delay: -9s;
-}
-.orb-3 {
-  width: 280px; height: 280px;
-  background: radial-gradient(circle, rgba(233,69,96,0.07) 0%, transparent 65%);
-  top: 42%; left: 44%; animation-delay: -17s;
-}
+    /* ─── ANIMATED GRID ─── */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(233,69,96,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(233,69,96,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      z-index: -1;
+      mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%);
+    }
 
-@keyframes float {
-  0%   { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(44px, 32px) scale(1.08); }
-}
+    main { position: relative; z-index: 1; }
 
-/* ═══════════════════════════════════════════
-   LAYOUT WRAPPER
-═══════════════════════════════════════════ */
-.page { position: relative; z-index: 1; }
-.container { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+    /* ─── NAV ─── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 2.5rem;
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      background: rgba(13,13,13,0.6);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-/* ═══════════════════════════════════════════
-   NAV
-═══════════════════════════════════════════ */
-.nav {
-  position: sticky; top: 0; z-index: 200;
-  background: rgba(18, 5, 7, 0.72);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-bottom: 1px solid rgba(233,69,96,0.12);
-}
-.nav-inner {
-  display: flex; align-items: center; justify-content: space-between;
-  max-width: 1080px; margin: 0 auto; padding: 13px 28px;
-}
-.nav-logo { display: flex; align-items: center; gap: 11px; text-decoration: none; }
-.nav-logo-mark {
-  width: 36px; height: 36px; border-radius: 10px;
-  background: linear-gradient(135deg, var(--accent), #b52040);
-  display: grid; place-items: center; font-size: 18px;
-  box-shadow: 0 4px 18px var(--accent-glow); flex-shrink: 0;
-}
-.nav-logo-text {
-  font-size: 1.15rem; font-weight: 700;
-  letter-spacing: -0.03em; color: var(--text);
-}
-.nav-status {
-  display: flex; align-items: center; gap: 7px;
-  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--accent);
-  background: var(--accent-subtle);
-  border: 1px solid rgba(233,69,96,0.28); border-radius: 30px;
-  padding: 5px 14px;
-  animation: status-pulse 3.2s ease-in-out infinite;
-}
-.status-dot {
-  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
-  animation: blink 2s ease-in-out infinite;
-}
-@keyframes blink    { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
-@keyframes status-pulse {
-  0%,100% { box-shadow: 0 0 0 0 var(--accent-glow); }
-  50%     { box-shadow: 0 0 0 5px rgba(233,69,96,0); }
-}
+    .nav-logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: -0.02em;
+    }
+    .nav-logo .mirror-m { color: var(--accent); }
 
-/* ═══════════════════════════════════════════
-   HERO
-═══════════════════════════════════════════ */
-.hero {
-  padding: 120px 0 96px; text-align: center;
-  animation: fadeup 0.9s cubic-bezier(0.22,1,0.36,1) both;
-}
+    .nav-badge {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid rgba(233,69,96,0.3);
+      padding: 0.3rem 0.8rem;
+      border-radius: 100px;
+      animation: pulse-badge 2.5s ease-in-out infinite;
+    }
 
-.hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--accent);
-  background: var(--accent-subtle);
-  border: 1px solid rgba(233,69,96,0.26); border-radius: 30px;
-  padding: 6px 16px; margin-bottom: 32px;
-}
-.eyebrow-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent); animation: blink 2s ease-in-out infinite;
-}
+    @keyframes pulse-badge {
+      0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+      50% { box-shadow: 0 0 0 6px transparent; }
+    }
 
-.hero-wordmark {
-  font-size: clamp(3.2rem, 8.5vw, 7rem);
-  font-weight: 900; letter-spacing: -0.05em; line-height: 0.95;
-  margin-bottom: 10px; color: var(--text);
-  /* Subtle red tint on word */
-  background: linear-gradient(160deg, #ffffff 30%, #f0b8c2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+    /* ─── HERO ─── */
+    .hero {
+      text-align: center;
+      padding: 7rem 1.5rem 5rem;
+      max-width: 900px;
+      margin: 0 auto;
+      animation: fadeUp 0.9s ease both;
+    }
 
-.hero-tagline {
-  font-size: clamp(1.1rem, 2.8vw, 1.65rem);
-  font-weight: 300; font-style: italic;
-  color: var(--accent); letter-spacing: 0.01em;
-  margin-bottom: 28px;
-  opacity: 0.9;
-}
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
-.hero-desc {
-  font-size: clamp(0.92rem, 1.8vw, 1.08rem);
-  color: var(--text-muted); font-weight: 300; line-height: 1.8;
-  max-width: 560px; margin: 0 auto 52px;
-}
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 1.8rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.1s ease forwards;
+    }
 
-.hero-actions {
-  display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;
-}
+    .hero-eyebrow::before,
+    .hero-eyebrow::after {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: var(--accent);
+      opacity: 0.5;
+    }
 
-.btn {
-  display: inline-flex; align-items: center; gap: 7px;
-  font-size: 0.88rem; font-weight: 600; font-family: var(--font);
-  text-decoration: none; border-radius: 50px;
-  padding: 12px 28px; border: none; cursor: pointer;
-  transition: transform var(--transition), box-shadow var(--transition);
-}
-.btn-primary {
-  background: var(--accent); color: #fff;
-  box-shadow: 0 6px 24px var(--accent-glow);
-}
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 38px rgba(233,69,96,0.6);
-}
-.btn-ghost {
-  background: transparent; color: var(--text-muted);
-  border: 1px solid var(--glass-border);
-}
-.btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.4rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.2s ease forwards;
+    }
 
-/* ═══════════════════════════════════════════
-   DIVIDER
-═══════════════════════════════════════════ */
-.hr {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(233,69,96,0.18), transparent);
-}
+    /* FIX: No gap between Mirror and You */
+    .hero-title span {
+      display: inline-block;
+      letter-spacing: normal;
+    }
 
-/* ═══════════════════════════════════════════
-   SECTION BASE
-═══════════════════════════════════════════ */
-section { padding: 90px 0; }
+    .hero-title .accent { color: var(--accent); }
 
-.section-label {
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em;
-  text-transform: uppercase; color: var(--accent);
-  padding-left: 14px;
-  border-left: 4px solid var(--accent);
-  margin-bottom: 12px; display: block;
-}
-.section-title {
-  font-size: clamp(1.65rem, 3.8vw, 2.5rem);
-  font-weight: 800; letter-spacing: -0.035em; line-height: 1.12;
-  margin-bottom: 12px; color: var(--text);
-}
-.section-sub {
-  font-size: 0.97rem; color: var(--text-muted);
-  font-weight: 300; line-height: 1.74; max-width: 560px;
-}
-.section-head { margin-bottom: 48px; }
+    .hero-mirror-icon {
+      display: inline-block;
+      font-size: 0.55em;
+      vertical-align: middle;
+      margin-right: 0.15em;
+      filter: drop-shadow(0 0 20px var(--accent));
+      animation: mirror-spin 6s ease-in-out infinite;
+    }
 
-/* Scroll reveal */
-.reveal {
-  opacity: 0; transform: translateY(28px);
-  transition: opacity 0.72s ease, transform 0.72s ease;
-}
-.reveal.visible { opacity: 1; transform: translateY(0); }
+    @keyframes mirror-spin {
+      0%, 100% { transform: rotateY(0deg); }
+      50%  { transform: rotateY(25deg); }
+    }
 
-/* ═══════════════════════════════════════════
-   ABOUT
-═══════════════════════════════════════════ */
-.about-card {
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: var(--radius-card);
-  padding: 44px 48px;
-  position: relative; overflow: hidden;
-}
-.about-card::before {
-  content: ''; position: absolute;
-  top: 0; left: 0; width: 4px; height: 100%;
-  background: linear-gradient(180deg, var(--accent) 0%, transparent 100%);
-}
-/* Decorative quote mark */
-.about-card::after {
-  content: '\201C';
-  position: absolute; top: 16px; right: 32px;
-  font-size: 9rem; line-height: 1; color: rgba(233,69,96,0.06);
-  font-family: Georgia, serif; pointer-events: none;
-}
-.about-card p {
-  color: var(--text-muted); line-height: 1.88;
-  font-size: 0.98rem; font-weight: 300;
-}
-.about-card p strong { color: var(--text); font-weight: 600; }
+    .hero-tagline {
+      font-family: var(--font-display);
+      font-size: clamp(1rem, 2.5vw, 1.35rem);
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0.01em;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.3s ease forwards;
+    }
 
-.about-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
-.chip {
-  font-size: 0.76rem; font-weight: 600; color: var(--accent);
-  background: var(--accent-subtle);
-  border: 1px solid rgba(233,69,96,0.2); border-radius: 30px;
-  padding: 5px 14px; transition: background var(--transition);
-}
-.chip:hover { background: var(--accent-mid); }
+    .hero-tagline strong {
+      color: var(--text-white);
+      font-weight: 600;
+    }
 
-/* ═══════════════════════════════════════════
-   TECH STACK
-═══════════════════════════════════════════ */
-.stack-rows { display: flex; flex-direction: column; gap: 22px; }
-.stack-row  { display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+    .hero-desc {
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin: 0 auto 3rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.4s ease forwards;
+    }
 
-.stack-cat {
-  min-width: 155px; flex-shrink: 0;
-  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.13em;
-  text-transform: uppercase; color: var(--text-muted); padding-top: 9px;
-}
+    /* ─── SECTION WRAPPER ─── */
+    section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 5rem 1.5rem;
+    }
 
-.badges { display: flex; flex-wrap: wrap; gap: 9px; }
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(233,69,96,0.4), transparent);
+    }
 
-.badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 0.82rem; font-weight: 500; color: var(--text);
-  background: var(--glass); border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm); padding: 8px 15px;
-  transition: transform var(--transition), background var(--transition), border-color var(--transition);
-  cursor: default;
-}
-.badge:hover {
-  transform: translateY(-2px);
-  background: rgba(255,255,255,0.10);
-  border-color: rgba(233,69,96,0.30);
-}
-.badge-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
 
-/* ═══════════════════════════════════════════
-   FEATURES
-═══════════════════════════════════════════ */
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(295px, 1fr));
-  gap: 20px;
-}
+    .section-sub {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      max-width: 600px;
+      margin-bottom: 3rem;
+    }
 
-.feat-card {
-  background: var(--card-bg);
-  border-radius: var(--radius-card);
-  padding: 30px 28px 28px;
-  box-shadow: var(--shadow-card);
-  position: relative; overflow: hidden;
-  transition: transform 0.32s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.32s ease;
-}
-.feat-card::after {
-  content: ''; position: absolute;
-  bottom: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--accent) 0%, rgba(233,69,96,0.06) 100%);
-  transform: scaleX(0); transform-origin: left;
-  transition: transform 0.3s ease;
-}
-.feat-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lift); }
-.feat-card:hover::after { transform: scaleX(1); }
+    /* ─── GLASS CARD BASE ─── */
+    .glass {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      color: var(--text-dark);
+      border: 1px solid rgba(255,255,255,0.5);
+    }
 
-.feat-number {
-  position: absolute; top: 20px; right: 22px;
-  font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em;
-  color: rgba(28,16,24,0.14); user-select: none;
-}
+    /* ─── WHAT MAKES IT DIFFERENT ─── */
+    .different-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
 
-.feat-icon {
-  width: 50px; height: 50px; border-radius: 13px;
-  background: linear-gradient(135deg, rgba(233,69,96,0.13), rgba(233,69,96,0.04));
-  border: 1px solid rgba(233,69,96,0.18);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 23px; margin-bottom: 18px;
-  transition: transform 0.3s ease;
-}
-.feat-card:hover .feat-icon { transform: scale(1.07); }
+    .diff-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
 
-.feat-title {
-  font-size: 0.96rem; font-weight: 700; color: var(--card-text);
-  margin-bottom: 9px; letter-spacing: -0.015em;
-}
-.feat-desc {
-  font-size: 0.84rem; color: var(--card-muted);
-  line-height: 1.66; font-weight: 400;
-}
+    .diff-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
 
-/* ═══════════════════════════════════════════
-   PROGRESS
-═══════════════════════════════════════════ */
-.progress-section { text-align: center; }
+    .diff-card:hover {
+      border-color: rgba(233,69,96,0.3);
+      background: rgba(233,69,96,0.06);
+      transform: translateY(-3px);
+    }
 
-.progress-card {
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-radius: 26px; padding: 64px 52px;
-  position: relative; overflow: hidden;
-}
-.progress-card::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse 70% 55% at 50% 0%,
-    rgba(233,69,96,0.09), transparent 60%);
-  pointer-events: none;
-}
-/* Corner accents */
-.progress-card::after {
-  content: '';
-  position: absolute; top: 0; right: 0;
-  width: 160px; height: 160px;
-  background: radial-gradient(circle at top right, rgba(233,69,96,0.07), transparent 70%);
-  pointer-events: none;
-}
+    .diff-card:hover::before { opacity: 1; }
 
-.launch-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: var(--accent); color: #fff;
-  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.13em;
-  text-transform: uppercase; border-radius: 30px;
-  padding: 7px 20px; margin-bottom: 24px;
-  box-shadow: 0 6px 24px var(--accent-glow);
-  animation: badge-glow 3.8s ease-in-out infinite;
-}
-@keyframes badge-glow {
-  0%,100% { box-shadow: 0 6px 24px var(--accent-glow); }
-  50%     { box-shadow: 0 6px 40px rgba(233,69,96,0.7); }
-}
+    .diff-score {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid rgba(233,69,96,0.2);
+      display: inline-block;
+      padding: 0.25rem 0.7rem;
+      border-radius: 100px;
+      margin-bottom: 0.9rem;
+    }
 
-.launch-year {
-  font-size: clamp(2.4rem, 5.5vw, 4rem);
-  font-weight: 900; letter-spacing: -0.05em;
-  margin-bottom: 8px;
-  background: linear-gradient(135deg, #fff 0%, #e8c0c8 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.launch-sub {
-  font-size: 0.9rem; color: var(--text-muted); margin-bottom: 48px;
-  font-weight: 300;
-}
+    .diff-problem {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      font-weight: 300;
+    }
 
-.prog-outer { max-width: 520px; margin: 0 auto; }
-.prog-labels {
-  display: flex; justify-content: space-between;
-  font-size: 0.77rem; color: var(--text-muted); margin-bottom: 10px;
-}
-.prog-track {
-  width: 100%; height: 9px;
-  background: rgba(255,255,255,0.07); border-radius: 20px; overflow: hidden;
-}
-.prog-fill {
-  height: 100%; width: 42%; border-radius: 20px;
-  background: linear-gradient(90deg, var(--accent) 0%, #ff8099 100%);
-  animation: prog-grow 2.2s cubic-bezier(0.22,1,0.36,1) both 0.5s;
-  position: relative; overflow: hidden;
-}
-@keyframes prog-grow { from { width: 0; } to { width: 42%; } }
-.prog-fill::after {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.38) 50%, transparent 100%);
-  animation: shimmer 2.6s linear infinite;
-}
-@keyframes shimmer { 0%{transform:translateX(-200%);} 100%{transform:translateX(300%);} }
+    .diff-solution {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-white);
+      line-height: 1.45;
+    }
 
-.milestones {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 38px;
-}
-.ms {
-  display: flex; align-items: center; gap: 7px;
-  font-size: 0.79rem; font-weight: 600;
-  padding: 7px 17px; border-radius: 30px;
-  border: 1px solid var(--glass-border);
-}
-.ms-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.ms.done   { color: #72e8a8; border-color: rgba(114,232,168,0.28); background: rgba(114,232,168,0.07); }
-.ms.done   .ms-dot { background: #72e8a8; }
-.ms.active { color: var(--accent); border-color: rgba(233,69,96,0.38); background: var(--accent-subtle); }
-.ms.active .ms-dot { background: var(--accent); animation: blink 2s infinite; }
-.ms.next   { color: var(--text-muted); }
-.ms.next   .ms-dot { background: var(--text-muted); opacity: 0.35; }
+    .diff-arrow {
+      color: var(--accent);
+      font-size: 1.1rem;
+      display: block;
+      margin: 0.4rem 0;
+    }
 
-/* ═══════════════════════════════════════════
-   FOOTER
-═══════════════════════════════════════════ */
-footer {
-  border-top: 1px solid rgba(233,69,96,0.10);
-  padding: 34px 28px 36px;
-}
-.footer-inner {
-  max-width: 1080px; margin: 0 auto;
-  text-align: center;
-}
-.footer-row {
-  display: inline-flex; align-items: center; justify-content: center;
-  flex-wrap: wrap; gap: 0 8px;
-  font-size: 0.82rem; color: rgba(138,122,130,0.70);
-  line-height: 2;
-}
-.footer-row a {
-  color: rgba(138,122,130,0.70);
-  text-decoration: none;
-  transition: color 0.22s;
-}
-.footer-row a:hover { color: var(--accent); }
-.footer-sep { opacity: 0.5; user-select: none; }
-.footer-copy {
-  display: block; margin-top: 10px;
-  font-size: 0.72rem; color: rgba(138,122,130,0.40);
-}
+    /* ─── STACK BADGES ─── */
+    .stack-section { padding-top: 0; }
 
-/* ═══════════════════════════════════════════
-   ANIMATIONS
-═══════════════════════════════════════════ */
-@keyframes fadeup {
-  from { opacity: 0; transform: translateY(32px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+    .stack-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
 
-/* Staggered hero children */
-.hero > * { animation: fadeup 0.9s cubic-bezier(0.22,1,0.36,1) both; }
-.hero-eyebrow  { animation-delay: 0.05s; }
-.hero-wordmark { animation-delay: 0.14s; }
-.hero-tagline  { animation-delay: 0.22s; }
-.hero-desc     { animation-delay: 0.30s; }
-.hero-actions  { animation-delay: 0.38s; }
+    .stack-group-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.8rem;
+    }
 
-/* ═══════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════ */
-@media (max-width: 700px) {
-  .hero          { padding: 84px 0 68px; }
-  section        { padding: 68px 0; }
-  .about-card    { padding: 30px 26px; }
-  .progress-card { padding: 44px 26px; }
-  .stack-row     { flex-direction: column; gap: 8px; }
-  .stack-cat     { padding-top: 0; }
-  .hero-actions  { flex-direction: column; align-items: center; }
-  .features-grid { grid-template-columns: 1fr; }
-}
-@media (max-width: 460px) {
-  .milestones { flex-direction: column; align-items: center; }
-  .nav-logo-text { font-size: 1rem; }
-}
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.45rem 0.95rem;
+      border-radius: 100px;
+      border: 1px solid var(--card-border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-white);
+      transition: all 0.25s ease;
+      cursor: default;
+    }
+
+    .badge:hover {
+      background: var(--accent-dim);
+      border-color: rgba(233,69,96,0.4);
+      color: var(--accent);
+      transform: scale(1.04);
+    }
+
+    .badge .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* ─── FEATURES GRID ─── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .feature-card {
+      padding: 1.6rem;
+      border-radius: 18px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6);
+      pointer-events: none;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2), 0 0 0 1px rgba(233,69,96,0.15);
+    }
+
+    .feature-new {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #fff;
+      background: var(--accent);
+      padding: 0.2rem 0.55rem;
+      border-radius: 100px;
+    }
+
+    .feature-icon {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      display: block;
+      line-height: 1;
+    }
+
+    .feature-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 0.4rem;
+    }
+
+    .feature-desc {
+      font-size: 0.85rem;
+      color: var(--text-dark-muted);
+      line-height: 1.55;
+    }
+
+    /* ─── PROGRESS / LAUNCH ─── */
+    .launch-card {
+      padding: 3rem;
+      border-radius: 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .launch-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -10%;
+      width: 50%;
+      height: 200%;
+      background: linear-gradient(90deg, transparent, rgba(233,69,96,0.06), transparent);
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(300%); }
+    }
+
+    .launch-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+    }
+
+    .launch-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 800;
+      color: var(--text-dark);
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+    }
+
+    .launch-sub {
+      color: var(--text-dark-muted);
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+
+    .progress-track {
+      background: rgba(0,0,0,0.08);
+      border-radius: 100px;
+      height: 10px;
+      overflow: hidden;
+      margin-bottom: 0.6rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, var(--accent), #ff6b8a);
+      width: 0%;
+      animation: grow-bar 2s 0.5s cubic-bezier(0.23,1,0.32,1) forwards;
+      box-shadow: 0 0 12px rgba(233,69,96,0.5);
+    }
+
+    @keyframes grow-bar {
+      to { width: 65%; }
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-dark-muted);
+      font-weight: 500;
+    }
+
+    .progress-pct {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin: 1.2rem 0 0.2rem;
+    }
+
+    .progress-pct-label {
+      font-size: 0.8rem;
+      color: var(--text-dark-muted);
+      margin-bottom: 1.6rem;
+    }
+
+    .milestone-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .milestone {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--text-dark-muted);
+    }
+
+    .milestone .dot-check {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.55rem;
+      flex-shrink: 0;
+    }
+
+    .milestone.done .dot-check { background: #22c55e; color: #fff; }
+    .milestone.done { color: var(--text-dark); font-weight: 500; }
+    .milestone.pending .dot-check { background: rgba(0,0,0,0.1); color: transparent; }
+
+    /* ─── DIVIDER ─── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--card-border), transparent);
+      margin: 0 1.5rem;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      font-size: 0.82rem;
+      color: rgba(245,245,245,0.45);
+      border-top: 1px solid var(--card-border);
+      position: relative;
+      z-index: 1;
+    }
+
+    footer a {
+      color: rgba(245,245,245,0.55);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      margin: 0 0.3rem;
+    }
+
+    footer a:hover { color: var(--accent); }
+
+    .footer-sep {
+      margin: 0 0.4rem;
+      opacity: 0.3;
+    }
+
+    /* ─── SCROLL REVEAL ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 640px) {
+      nav { padding: 1.2rem 1.5rem; }
+      .hero { padding: 5rem 1.2rem 3.5rem; }
+      section { padding: 3.5rem 1.2rem; }
+      .launch-card { padding: 2rem 1.5rem; }
+    }
   </style>
 </head>
 <body>
 
-<!-- ── AMBIENT BACKGROUND ──────────────────────────────────── -->
-<div id="ambient" aria-hidden="true">
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-</div>
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
 
-<div class="page">
-
-  <!-- ── NAV ──────────────────────────────────────────────── -->
-  <nav aria-label="Site navigation">
-    <div class="nav-inner">
-      <a href="#" class="nav-logo" aria-label="MirrorYou home">
-        <div class="nav-logo-mark" aria-hidden="true">🪞</div>
-        <span class="nav-logo-text">MirrorYou</span>
-      </a>
-      <span class="nav-status" role="status" aria-live="polite">
-        <span class="status-dot" aria-hidden="true"></span>
-        Under Construction
-      </span>
-    </div>
-  </nav>
-
-  <!-- ── HERO ─────────────────────────────────────────────── -->
-  <section aria-labelledby="hero-h" style="padding:0;">
-    <div class="container">
-      <div class="hero">
-        <div class="hero-eyebrow">
-          <span class="eyebrow-dot" aria-hidden="true"></span>
-          Launching Summer 2026
-        </div>
-
-        <h1 class="hero-wordmark" id="hero-h">MirrorYou</h1>
-
-        <p class="hero-tagline">"Your Honest Speaking Mirror"</p>
-
-        <p class="hero-desc">
-          An AI-powered presentation coach that watches how you speak,
-          how you carry yourself, and how confident you look —
-          then turns that data into actionable feedback.
-        </p>
-
-        <div class="hero-actions">
-          <a href="https://github.com/yaswanthkumar-07" target="_blank" rel="noopener" class="btn btn-primary">
-            ⭐ Follow on GitHub
-          </a>
-          <a href="https://yaswanth.nxtdev.xyz" target="_blank" rel="noopener" class="btn btn-ghost">
-            👤 Developer Portfolio ↗
-          </a>
-        </div>
+  <main>
+    <!-- NAV -->
+    <nav>
+      <div class="nav-logo">
+        <span class="mirror-m">M</span>irrorYou
       </div>
-    </div>
-  </section>
+      <span class="nav-badge">Coming Summer 2026</span>
+    </nav>
 
-  <div class="container"><div class="hr"></div></div>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-eyebrow">AI-Powered Presentation Coach</div>
+      <h1 class="hero-title">
+        <span class="hero-mirror-icon">🪞</span>
+        <span class="accent">Mirror</span>You
+      </h1>
+      <p class="hero-tagline">
+        Your Honest Speaking Mirror — <strong>That Teaches</strong>
+      </p>
+      <p class="hero-desc">
+        Most tools watch you present and hand you a score. MirrorYou watches, listens, and then
+        gives you a <strong>personalized roadmap</strong> to get better — exercises, script improvements,
+        and weekly practice plans built around your actual weak spots.
+      </p>
+    </section>
 
-  <!-- ── ABOUT ─────────────────────────────────────────────── -->
-  <section aria-labelledby="about-h">
-    <div class="container reveal">
-      <div class="section-head">
-        <span class="section-label">About the Project</span>
-        <h2 class="section-title" id="about-h">What is MirrorYou?</h2>
-        <p class="section-sub">A full-stack application that turns every presentation into structured, measurable data.</p>
-      </div>
+    <!-- WHAT MAKES IT DIFFERENT -->
+    <section>
+      <div class="section-label reveal">The MirrorYou Difference</div>
+      <h2 class="section-title reveal">We Don't Just Judge.<br>We <span style="color:var(--accent)">Teach.</span></h2>
+      <p class="section-sub reveal">
+        Other coaches give you numbers. MirrorYou turns every low score into a concrete,
+        actionable drill you can practice today.
+      </p>
 
-      <div class="about-card">
-        <p>
-          <strong>MirrorYou</strong> is a full-stack web application built with the
-          <strong>MERN stack</strong> (MongoDB, Express, React, Node.js) and integrated with
-          <strong>AWS AI services</strong>. Users record themselves giving presentations
-          directly in the browser. The system automatically analyzes
-          <strong>verbal communication</strong> — clarity, pace, and filler words — and
-          <strong>non-verbal communication</strong> — eye contact, smiles, gestures, and
-          confidence — using <strong>AWS Rekognition</strong> and <strong>AWS Transcribe</strong>.
-          All results are saved to <strong>MongoDB</strong> and displayed on a rich dashboard
-          with <strong>historical charts</strong> so you can track improvement over time.
-        </p>
-        <div class="about-chips" aria-label="Core capabilities">
-          <span class="chip">🎙️ Verbal Analysis</span>
-          <span class="chip">👁️ Eye Contact Tracking</span>
-          <span class="chip">😊 Smile Frequency</span>
-          <span class="chip">🤲 Gesture Recognition</span>
-          <span class="chip">🧠 AI Confidence Score</span>
-          <span class="chip">📊 Progress Dashboard</span>
-          <span class="chip">📁 History &amp; Reports</span>
+      <div class="different-grid">
+        <div class="diff-card reveal">
+          <div class="diff-score">Eye Contact 40%</div>
+          <p class="diff-problem">You struggled to maintain eye contact throughout your recording.</p>
+          <span class="diff-arrow">→</span>
+          <div class="diff-solution">Try the 2-minute <em>Focus Dot Drill</em> before your next session.</div>
+        </div>
+        <div class="diff-card reveal">
+          <div class="diff-score">Filler Words: High</div>
+          <p class="diff-problem">Frequent "um" and "uh" detected — 14 in under 3 minutes.</p>
+          <span class="diff-arrow">→</span>
+          <div class="diff-solution">Practice the <em>"Pause Instead of Um"</em> exercise — silence is power.</div>
+        </div>
+        <div class="diff-card reveal">
+          <div class="diff-score">Confidence: Low</div>
+          <p class="diff-problem">Body language and vocal tone signals indicate low confidence.</p>
+          <span class="diff-arrow">→</span>
+          <div class="diff-solution">Run a <em>Power Pose Routine</em> for 60 seconds before hitting record.</div>
+        </div>
+        <div class="diff-card reveal">
+          <div class="diff-score">Voice: Monotone</div>
+          <p class="diff-problem">Pitch variance was minimal — listeners may disengage.</p>
+          <span class="diff-arrow">→</span>
+          <div class="diff-solution">Warm up with the <em>Pitch Variation Exercise</em> — highs, lows, emphasis.</div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <div class="container"><div class="hr"></div></div>
+    <div class="divider"></div>
 
-  <!-- ── TECH STACK ─────────────────────────────────────────── -->
-  <section aria-labelledby="stack-h">
-    <div class="container reveal">
-      <div class="section-head">
-        <span class="section-label">Technical Stack</span>
-        <h2 class="section-title" id="stack-h">Built with Modern Tools</h2>
-        <p class="section-sub">Every layer chosen for performance, scalability, and deep AI integration.</p>
-      </div>
+    <!-- TECH STACK -->
+    <section class="stack-section">
+      <div class="section-label reveal">Built With</div>
+      <h2 class="section-title reveal">Technical Stack</h2>
 
-      <div class="stack-rows">
-
-        <div class="stack-row">
-          <div class="stack-cat">Frontend</div>
-          <div class="badges">
-            <span class="badge"><span class="badge-dot" style="background:#61DAFB;"></span>React.js</span>
-            <span class="badge"><span class="badge-dot" style="background:#38BDF8;"></span>Tailwind CSS</span>
-            <span class="badge"><span class="badge-dot" style="background:#FF6384;"></span>Chart.js</span>
+      <div class="stack-groups reveal">
+        <div>
+          <div class="stack-group-label">Frontend</div>
+          <div class="badge-row">
+            <span class="badge"><span class="dot"></span>React.js</span>
+            <span class="badge"><span class="dot"></span>Tailwind CSS</span>
+            <span class="badge"><span class="dot"></span>Chart.js</span>
           </div>
         </div>
-
-        <div class="stack-row">
-          <div class="stack-cat">Backend</div>
-          <div class="badges">
-            <span class="badge"><span class="badge-dot" style="background:#68A063;"></span>Node.js</span>
-            <span class="badge"><span class="badge-dot" style="background:#8D6748;"></span>Express.js</span>
-            <span class="badge"><span class="badge-dot" style="background:#F7B731;"></span>JWT</span>
-            <span class="badge"><span class="badge-dot" style="background:#a78bfa;"></span>Multer</span>
+        <div>
+          <div class="stack-group-label">Backend</div>
+          <div class="badge-row">
+            <span class="badge"><span class="dot"></span>Node.js</span>
+            <span class="badge"><span class="dot"></span>Express.js</span>
+            <span class="badge"><span class="dot"></span>JWT Auth</span>
+            <span class="badge"><span class="dot"></span>Multer</span>
           </div>
         </div>
-
-        <div class="stack-row">
-          <div class="stack-cat">Database</div>
-          <div class="badges">
-            <span class="badge"><span class="badge-dot" style="background:#47A248;"></span>MongoDB Atlas</span>
+        <div>
+          <div class="stack-group-label">Database</div>
+          <div class="badge-row">
+            <span class="badge"><span class="dot"></span>MongoDB Atlas</span>
           </div>
         </div>
-
-        <div class="stack-row">
-          <div class="stack-cat">Cloud &amp; AI</div>
-          <div class="badges">
-            <span class="badge"><span class="badge-dot" style="background:#FF9900;"></span>AWS S3</span>
-            <span class="badge"><span class="badge-dot" style="background:#FF9900;"></span>AWS Rekognition</span>
-            <span class="badge"><span class="badge-dot" style="background:#FF9900;"></span>AWS Transcribe</span>
-            <span class="badge"><span class="badge-dot" style="background:#FF9900;"></span>AWS Lambda</span>
+        <div>
+          <div class="stack-group-label">Cloud & AI</div>
+          <div class="badge-row">
+            <span class="badge"><span class="dot"></span>AWS S3</span>
+            <span class="badge"><span class="dot"></span>AWS Rekognition</span>
+            <span class="badge"><span class="dot"></span>AWS Transcribe</span>
+            <span class="badge"><span class="dot"></span>AWS Lambda</span>
+            <span class="badge"><span class="dot"></span>GPT / Claude API</span>
           </div>
         </div>
-
-        <div class="stack-row">
-          <div class="stack-cat">Deployment</div>
-          <div class="badges">
-            <span class="badge"><span class="badge-dot" style="background:#F6821F;"></span>Cloudflare Pages</span>
-            <span class="badge"><span class="badge-dot" style="background:#46E3B7;"></span>Render</span>
+        <div>
+          <div class="stack-group-label">Deployment</div>
+          <div class="badge-row">
+            <span class="badge"><span class="dot"></span>Cloudflare Pages</span>
+            <span class="badge"><span class="dot"></span>Render</span>
           </div>
         </div>
-
       </div>
-    </div>
-  </section>
+    </section>
 
-  <div class="container"><div class="hr"></div></div>
+    <div class="divider"></div>
 
-  <!-- ── FEATURES ──────────────────────────────────────────── -->
-  <section aria-labelledby="feat-h">
-    <div class="container reveal">
-      <div class="section-head">
-        <span class="section-label">Features</span>
-        <h2 class="section-title" id="feat-h">What's Being Built</h2>
-        <p class="section-sub">Seven tightly integrated modules covering every dimension of presentation performance.</p>
-      </div>
+    <!-- FEATURES -->
+    <section>
+      <div class="section-label reveal">What's Inside</div>
+      <h2 class="section-title reveal">10 Features That <span style="color:var(--accent)">Move the Needle</span></h2>
+      <p class="section-sub reveal">From raw recording to a full improvement roadmap — everything you need in one place.</p>
 
       <div class="features-grid">
-
-        <article class="feat-card">
-          <span class="feat-number">01</span>
-          <div class="feat-icon" aria-hidden="true">📹</div>
-          <h3 class="feat-title">Webcam Recording</h3>
-          <p class="feat-desc">Record presentations directly in the browser with no plugins or installs. Video is securely captured and uploaded to AWS S3.</p>
-        </article>
-
-        <article class="feat-card">
-          <span class="feat-number">02</span>
-          <div class="feat-icon" aria-hidden="true">🎙️</div>
-          <h3 class="feat-title">Voice Analysis</h3>
-          <p class="feat-desc">AWS Transcribe drives clarity scoring, words-per-minute measurement, and automatic detection of filler words like "um", "uh", and "like".</p>
-        </article>
-
-        <article class="feat-card">
-          <span class="feat-number">03</span>
-          <div class="feat-icon" aria-hidden="true">👁️</div>
-          <h3 class="feat-title">Face Analysis</h3>
-          <p class="feat-desc">AWS Rekognition tracks eye contact quality and smile frequency frame by frame, surfacing how engaged and expressive you appear.</p>
-        </article>
-
-        <article class="feat-card">
-          <span class="feat-number">04</span>
-          <div class="feat-icon" aria-hidden="true">🤲</div>
-          <h3 class="feat-title">Gesture Recognition</h3>
-          <p class="feat-desc">Counts and categorizes hand movements and body gestures throughout your session to help balance stillness with purposeful motion.</p>
-        </article>
-
-        <article class="feat-card">
-          <span class="feat-number">05</span>
-          <div class="feat-icon" aria-hidden="true">🧠</div>
-          <h3 class="feat-title">Confidence Scoring</h3>
-          <p class="feat-desc">AI aggregates voice tone, posture signals, and facial cues into a single overall confidence score with personalized improvement tips.</p>
-        </article>
-
-        <article class="feat-card">
-          <span class="feat-number">06</span>
-          <div class="feat-icon" aria-hidden="true">📊</div>
-          <h3 class="feat-title">Dashboard &amp; Charts</h3>
-          <p class="feat-desc">Chart.js visualizes every metric across sessions, making week-over-week improvement visible and keeping you motivated to keep practicing.</p>
-        </article>
-
-        <article class="feat-card">
-          <span class="feat-number">07</span>
-          <div class="feat-icon" aria-hidden="true">📁</div>
-          <h3 class="feat-title">History &amp; Reports</h3>
-          <p class="feat-desc">Browse all past sessions, replay recordings, and download detailed PDF feedback reports to share with coaches or track long-term growth.</p>
-        </article>
-
-      </div>
-    </div>
-  </section>
-
-  <div class="container"><div class="hr"></div></div>
-
-  <!-- ── PROGRESS ───────────────────────────────────────────── -->
-  <section aria-labelledby="prog-h" class="progress-section" style="padding-bottom:100px;">
-    <div class="container reveal">
-      <div class="section-head" style="text-align:center;">
-        <span class="section-label" style="border-left:none; padding-left:0; display:block; text-align:center;">Launch Timeline</span>
-        <h2 class="section-title" id="prog-h">Progress &amp; Milestones</h2>
-      </div>
-
-      <div class="progress-card">
-
-        <div class="launch-badge" role="status">🚀 Target Launch</div>
-
-        <div class="launch-year">Summer 2026</div>
-        <p class="launch-sub">Actively in development — core AI analysis engine in progress</p>
-
-        <div class="prog-outer" role="progressbar" aria-valuenow="42" aria-valuemin="0" aria-valuemax="100" aria-label="Development progress 42%">
-          <div class="prog-labels">
-            <span>Development Progress</span>
-            <span>42%</span>
-          </div>
-          <div class="prog-track">
-            <div class="prog-fill"></div>
-          </div>
+        <div class="feature-card glass reveal">
+          <span class="feature-icon">📷</span>
+          <div class="feature-title">Webcam Recording</div>
+          <p class="feature-desc">Record presentations directly in your browser. No installs, no friction — just hit record and go.</p>
         </div>
 
-        <div class="milestones" aria-label="Project milestones">
-          <div class="ms done">  <span class="ms-dot"></span>Project Architecture</div>
-          <div class="ms done">  <span class="ms-dot"></span>AWS Integration</div>
-          <div class="ms active"><span class="ms-dot"></span>Core Analysis Engine</div>
-          <div class="ms next">  <span class="ms-dot"></span>Dashboard UI</div>
-          <div class="ms next">  <span class="ms-dot"></span>Beta Testing</div>
-          <div class="ms next">  <span class="ms-dot"></span>Public Launch</div>
+        <div class="feature-card glass reveal">
+          <span class="feature-icon">🎤</span>
+          <div class="feature-title">Voice Analysis</div>
+          <p class="feature-desc">AWS Transcribe measures your clarity score, words per minute, and detects every filler word.</p>
         </div>
 
-      </div>
-    </div>
-  </section>
+        <div class="feature-card glass reveal">
+          <span class="feature-icon">👁️</span>
+          <div class="feature-title">Face Analysis</div>
+          <p class="feature-desc">AWS Rekognition tracks eye contact duration and smile frequency throughout your session.</p>
+        </div>
 
-  <!-- ── FOOTER ─────────────────────────────────────────────── -->
+        <div class="feature-card glass reveal">
+          <span class="feature-icon">🤚</span>
+          <div class="feature-title">Gesture Recognition</div>
+          <p class="feature-desc">AI counts and evaluates your hand movements — too few or too many both affect your score.</p>
+        </div>
+
+        <div class="feature-card glass reveal">
+          <span class="feature-icon">💡</span>
+          <div class="feature-title">Confidence Scoring</div>
+          <p class="feature-desc">A composite AI-powered score blending posture, voice, and facial signals into one confidence index.</p>
+        </div>
+
+        <div class="feature-card glass reveal">
+          <span class="feature-icon">📊</span>
+          <div class="feature-title">Dashboard & Charts</div>
+          <p class="feature-desc">Chart.js-powered visual dashboards show your improvement trajectory across every metric over time.</p>
+        </div>
+
+        <div class="feature-card glass reveal">
+          <span class="feature-icon">🗂️</span>
+          <div class="feature-title">History & Reports</div>
+          <p class="feature-desc">Browse past presentations with full feedback breakdowns. Track what changed between sessions.</p>
+        </div>
+
+        <div class="feature-card glass reveal" style="border: 2px solid rgba(233,69,96,0.25);">
+          <span class="feature-new">New</span>
+          <span class="feature-icon">🎯</span>
+          <div class="feature-title">Action Plan Generator</div>
+          <p class="feature-desc">Every low score becomes a specific drill. Not "improve eye contact" — a timed, repeatable exercise.</p>
+        </div>
+
+        <div class="feature-card glass reveal" style="border: 2px solid rgba(233,69,96,0.25);">
+          <span class="feature-new">New</span>
+          <span class="feature-icon">✍️</span>
+          <div class="feature-title">Script Improver</div>
+          <p class="feature-desc">Paste your script and Claude/GPT rewrites it for clarity, flow, and audience engagement. Instantly.</p>
+        </div>
+
+        <div class="feature-card glass reveal" style="border: 2px solid rgba(233,69,96,0.25);">
+          <span class="feature-new">New</span>
+          <span class="feature-icon">📅</span>
+          <div class="feature-title">Weekly Practice Plan</div>
+          <p class="feature-desc">Your personalized 7-day improvement roadmap — built from your specific weak areas, refreshed weekly.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- LAUNCH PROGRESS -->
+    <section>
+      <div class="section-label reveal">Timeline</div>
+      <h2 class="section-title reveal">When Can You Use It?</h2>
+
+      <div class="launch-card glass reveal">
+        <div class="launch-label">Development Progress</div>
+        <div class="launch-title">Launching Summer 2026</div>
+        <div class="launch-sub">Core infrastructure complete · AI integrations in progress</div>
+
+        <div class="progress-track">
+          <div class="progress-fill"></div>
+        </div>
+        <div class="progress-labels">
+          <span>Started</span>
+          <span>Summer 2026</span>
+        </div>
+
+        <div class="progress-pct">65%</div>
+        <div class="progress-pct-label">of core features shipped</div>
+
+        <div class="milestone-row">
+          <div class="milestone done">
+            <div class="dot-check">✓</div>
+            <span>MERN Setup</span>
+          </div>
+          <div class="milestone done">
+            <div class="dot-check">✓</div>
+            <span>Webcam Recording</span>
+          </div>
+          <div class="milestone done">
+            <div class="dot-check">✓</div>
+            <span>AWS Transcribe</span>
+          </div>
+          <div class="milestone done">
+            <div class="dot-check">✓</div>
+            <span>Dashboard & Charts</span>
+          </div>
+          <div class="milestone pending">
+            <div class="dot-check"></div>
+            <span>Action Plans</span>
+          </div>
+          <div class="milestone pending">
+            <div class="dot-check"></div>
+            <span>Script Improver</span>
+          </div>
+          <div class="milestone pending">
+            <div class="dot-check"></div>
+            <span>Weekly Plans</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
   <footer>
-    <div class="footer-inner">
-      <div class="footer-row">
-        <span>Built by Yaswanth</span>
-        <span class="footer-sep">·</span>
-        <a href="https://yaswanth.nxtdev.xyz" target="_blank" rel="noopener">Portfolio ↗</a>
-        <span class="footer-sep">·</span>
-        <a href="https://github.com/yaswanthkumar-07" target="_blank" rel="noopener">GitHub</a>
-        <span class="footer-sep">·</span>
-        <a href="https://www.linkedin.com/in/yaswanth-kumar-kolla/" target="_blank" rel="noopener">LinkedIn</a>
-        <span class="footer-sep">·</span>
-        <a href="mailto:kyaswanth865@gmail.com">kyaswanth865@gmail.com</a>
-      </div>
-      <span class="footer-copy">© 2026 MirrorYou. All rights reserved.</span>
-    </div>
+    Built by <strong style="color:rgba(245,245,245,0.7)">Yaswanth</strong>
+    <span class="footer-sep">·</span>
+    <a href="https://yaswanth.nxtdev.xyz" target="_blank" rel="noopener">Portfolio ↗</a>
+    <span class="footer-sep">·</span>
+    <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+    <span class="footer-sep">·</span>
+    <a href="https://linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
   </footer>
 
-</div><!-- /page -->
+  <script>
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.classList.add('visible');
+          }, 60 * (Array.from(reveals).indexOf(entry.target) % 5));
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => observer.observe(el));
 
-<script>
-  /* ── Scroll Reveal ── */
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        io.unobserve(e.target);
+    // Counter animation for progress %
+    const pct = document.querySelector('.progress-pct');
+    let started = false;
+    const pctObs = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && !started) {
+        started = true;
+        let count = 0;
+        const interval = setInterval(() => {
+          count++;
+          pct.textContent = count + '%';
+          if (count >= 65) clearInterval(interval);
+        }, 22);
       }
     });
-  }, { threshold: 0.09 });
-  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-</script>
+    if (pct) pctObs.observe(pct);
+  </script>
 </body>
 </html>
