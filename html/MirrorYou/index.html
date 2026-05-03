@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MirrorYou — Your Honest Speaking Mirror That Teaches</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-deep: #0d0d0d;
+      --bg-dark: #1a0a0a;
+      --accent: #e94560;
+      --accent-dim: rgba(233, 69, 96, 0.15);
+      --accent-glow: rgba(233, 69, 96, 0.4);
+      --card-bg: rgba(255, 255, 255, 0.96);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-white: #f5f5f5;
+      --text-muted: rgba(245, 245, 245, 0.55);
+      --text-dark: #1a1a1a;
+      --text-dark-muted: #555;
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-deep);
+      color: var(--text-white);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ─── NOISE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ─── GRADIENT BG ─── */
+    .bg-gradient {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(233,69,96,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(233,69,96,0.12) 0%, transparent 60%),
+        linear-gradient(160deg, #1a0a0a 0%, #0d0d0d 60%, #0a0505 100%);
+      z-index: -1;
+    }
+
+    /* ─── ANIMATED GRID ─── */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(233,69,96,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(233,69,96,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      z-index: -1;
+      mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%);
+    }
+
+    main { position: relative; z-index: 1; }
+
+    /* ─── NAV ─── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 2.5rem;
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      background: rgba(13,13,13,0.6);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: -0.02em;
+    }
+    .nav-logo .mirror-m { color: var(--accent); }
+
+    .nav-badge {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid rgba(233,69,96,0.3);
+      padding: 0.3rem 0.8rem;
+      border-radius: 100px;
+      animation: pulse-badge 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-badge {
+      0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+      50% { box-shadow: 0 0 0 6px transparent; }
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      text-align: center;
+      padding: 7rem 1.5rem 5rem;
+      max-width: 900px;
+      margin: 0 auto;
+      animation: fadeUp 0.9s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 1.8rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.1s ease forwards;
+    }
+
+    .hero-eyebrow::before,
+    .hero-eyebrow::after {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: var(--accent);
+      opacity: 0.5;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.4rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.2s ease forwards;
+    }
+
+    /* FIX: No gap between Mirror and You */
+    .hero-title span {
+      display: inline-block;
+      letter-spacing: normal;
+    }
+
+    .hero-title .accent { color: var(--accent); }
+
+    .hero-mirror-icon {
+      display: inline-block;
+      font-size: 0.55em;
+      vertical-align: middle;
+      margin-right: 0.15em;
+      filter: drop-shadow(0 0 20px var(--accent));
+      animation: mirror-spin 6s ease-in-out infinite;
+    }
+
+    @keyframes mirror-spin {
+      0%, 100% { transform: rotateY(0deg); }
+      50%  { transform: rotateY(25deg); }
+    }
+
+    .hero-tagline {
+      font-family: var(--font-display);
+      font-size: clamp(1rem, 2.5vw, 1.35rem);
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0.01em;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.3s ease forwards;
+    }
+
+    .hero-tagline strong {
+      color: var(--text-white);
+      font-weight: 600;
+    }
+
+    .hero-desc {
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin: 0 auto 3rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.4s ease forwards;
+    }
+
+    /* ─── SECTION WRAPPER ─── */
+    section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 5rem 1.5rem;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(233,69,96,0.4), transparent);
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+
+    .section-sub {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      max-width: 600px;
+      margin-bottom: 3rem;
+    }
+
+    /* ─── GLASS CARD BASE ─── */
+    .glass {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      color: var(--text-dark);
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+
+    /* ─── WHAT MAKES IT DIFFERENT ─── */
+    .different-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .diff-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .diff-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .diff-card:hover {
+      border-color: rgba(233,69,96,0.3);
+      background: rgba(233,69,96,0.06);
+      transform: translateY(-3px);
+    }
+
+    .diff-card:hover::before { opacity: 1; }
+
+    .diff-score {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid rgba(233,69,96,0.2);
+      display: inline-block;
+      padding: 0.25rem 0.7rem;
+      border-radius: 100px;
+      margin-bottom: 0.9rem;
+    }
+
+    .diff-problem {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      font-weight: 300;
+    }
+
+    .diff-solution {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-white);
+      line-height: 1.45;
+    }
+
+    .diff-arrow {
+      color: var(--accent);
+      font-size: 1.1rem;
+      display: block;
+      margin: 0.4rem 0;
+    }
+
+    /* ─── STACK BADGES ─── */
+    .stack-section { padding-top: 0; }
+
+    .stack-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .stack-group-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.8rem;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.45rem 0.95rem;
+      border-radius: 100px;
+      border: 1px solid var(--card-border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-white);
+      transition: all 0.25s ease;
+      cursor: default;
+    }
+
+    .badge:hover {
+      background: var(--accent-dim);
+      border-color: rgba(233,69,96,0.4);
+      color: var(--accent);
+      transform: scale(1.04);
+    }
+
+    .badge .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* ─── FEATURES GRID ─── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .feature-card {
+      padding: 1.6rem;
+      border-radius: 18px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6);
+      pointer-events: none;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2), 0 0 0 1px rgba(233,69,96,0.15);
+    }
+
+    .feature-new {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #fff;
+      background: var(--accent);
+      padding: 0.2rem 0.55rem;
+      border-radius: 100px;
+    }
+
+    .feature-icon {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      display: block;
+      line-height: 1;
+    }
+
+    .feature-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 0.4rem;
+    }
+
+    .feature-desc {
+      font-size: 0.85rem;
+      color: var(--text-dark-muted);
+      line-height: 1.55;
+    }
+
+    /* ─── PROGRESS / LAUNCH ─── */
+    .launch-card {
+      padding: 3rem;
+      border-radius: 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .launch-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -10%;
+      width: 50%;
+      height: 200%;
+      background: linear-gradient(90deg, transparent, rgba(233,69,96,0.06), transparent);
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(300%); }
+    }
+
+    .launch-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+    }
+
+    .launch-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 800;
+      color: var(--text-dark);
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+    }
+
+    .launch-sub {
+      color: var(--text-dark-muted);
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+
+    .progress-track {
+      background: rgba(0,0,0,0.08);
+      border-radius: 100px;
+      height: 10px;
+      overflow: hidden;
+      margin-bottom: 0.6rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, var(--accent), #ff6b8a);
+      width: 0%;
+      animation: grow-bar 2s 0.5s cubic-bezier(0.23,1,0.32,1) forwards;
+      box-shadow: 0 0 12px rgba(233,69,96,0.5);
+    }
+
+    @keyframes grow-bar {
+      to { width: 65%; }
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-dark-muted);
+      font-weight: 500;
+    }
+
+    .progress-pct {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin: 1.2rem 0 0.2rem;
+    }
+
+    .progress-pct-label {
+      font-size: 0.8rem;
+      color: var(--text-dark-muted);
+      margin-bottom: 1.6rem;
+    }
+
+    .milestone-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .milestone {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--text-dark-muted);
+    }
+
+    .milestone .dot-check {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.55rem;
+      flex-shrink: 0;
+    }
+
+    .milestone.done .dot-check { background: #22c55e; color: #fff; }
+    .milestone.done { color: var(--text-dark); font-weight: 500; }
+    .milestone.pending .dot-check { background: rgba(0,0,0,0.1); color: transparent; }
+
+    /* ─── DIVIDER ─── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--card-border), transparent);
+      margin: 0 1.5rem;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      font-size: 0.82rem;
+      color: rgba(245,245,245,0.45);
+      border-top: 1px solid var(--card-border);
+      position: relative;
+      z-index: 1;
+    }
+
+    footer a {
+      color: rgba(245,245,245,0.55);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      margin: 0 0.3rem;
+    }
+
+    footer a:hover { color: var(--accent); }
+
+    .footer-sep {
+      margin: 0 0.4rem;
+      opacity: 0.3;
+    }
+
+    /* ─── SCROLL REVEAL ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 640px) {
+      nav { padding: 1.2rem 1.5rem; }
+      .hero { padding: 5rem 1.2rem 3.5rem; }
+      section { padding: 3.5rem 1.2rem; }
+      .launch-card { padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+
+  <main>
+    <!-- NAV -->
+    <nav>
+      <div class="nav-logo">
+        <span class="mirror-m">M</span>irrorYou
+      </div>
+      <span class="nav-badge">Coming Summer 2026</span>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-eyebrow">AI-Powered Presentation Coach</div>
+      <h1 class="hero-title">
+        <span class="hero-mirror-icon">🪞</span>
+        <span class="accent">Mirror</span>You
+      </h1>
+      <p class="hero-tagline">
+        Your Honest Speaking Mirror — <strong>That Teaches</strong>
+      </p>
+      <p class="hero-desc">
+        Most tools watch you present and hand you a score. MirrorYou watches, listens, and then
+        gives you a <strong>personalized roadmap</strong> to get better — exercises, script improvements,
+        and weekly practice plans built around your actual weak spots.
+      </p>
+    </section>
+
+    <!-- WHAT MAKES IT DIFFERENT -->
+    <section>
+      <div class="section-label reveal">The MirrorYou Difference</div>
+      <h2 class="section-title reveal">We Don't Just Judge.<br>We <span style="color:var(--accent)">Teach.</span></h2>
+      <p class="section-sub reveal">
+        Other coaches give you numbers. MirrorYou turns every low score into a concrete,
+        actionable drill you can practice today.
+      </p>
+
+      <div class="different-grid">
+        <div class="diff-card reveal">
+          <div class="diff-score">Eye Contact 40%</div>
+          <p class="diff-problem">You struggled to maintain eye contact throughout your recording.</p>
+          <span class="diff-arrow">→</span>
+          <div class="diff-solution">Try the 2-minute <em>Focus Dot Drill</em> before your next session.</div>
+        </div>
+        <div class="diff-card reveal">
+          <div class="diff-score">Filler Words: High</div>
+          <p class="diff-problem">Frequent "um" and "uh" detected — 14 in under 3 minutes.</p>
+          <span class="diff-arrow">→</span>
+          <div class="diff-solution">Practice the <em>"Pause Instead of Um"</em> exercise — silence is power.</div>
+        </div>
+        <div class="diff-card reveal">
+          <div class="diff-score">Confidence: Low</div>
+          <p class="diff-problem">Body language and vocal tone signals indicate low confidence.</p>
+          <span class="diff-arrow">→</span>
+          <div class="diff-solution">Run a <em>Power Pose Routine</em> for 60 seconds before hitting record.</div>
+        </div>
+        <div class="diff-card reveal">
+          <div class="diff-score">Voice: Monotone</div>
+          <p class="diff-problem">Pitch variance was minimal — listeners may disengage.</p>
+          <span class="diff-arrow">→</span>
+          <div class="diff-solution">Warm up with the <em>Pitch Variation Exercise</em> — highs, lows, emphasis.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- TECH STACK -->
+    <section class="stack-section">
+      <div class="section-label reveal">Built With</div>
+      <h2 class="section-title reveal">Technical Stack</h2>
+
+      <div class="stack-groups reveal">
+        <div>
+          <div class="stack-group-label">Frontend</div>
+          <div class="badge-row">
+            <span class="badge"><span class="dot"></span>React.js</span>
+            <span class="badge"><span class="dot"></span>Tailwind CSS</span>
+            <span class="badge"><span class="dot"></span>Chart.js</span>
+          </div>
+        </div>
+        <div>
+          <div class="stack-group-label">Backend</div>
+          <div class="badge-row">
+            <span class="badge"><span class="dot"></span>Node.js</span>
+            <span class="badge"><span class="dot"></span>Express.js</span>
+            <span class="badge"><span class="dot"></span>JWT Auth</span>
+            <span class="badge"><span class="dot"></span>Multer</span>
+          </div>
+        </div>
+        <div>
+          <div class="stack-group-label">Database</div>
+          <div class="badge-row">
+            <span class="badge"><span class="dot"></span>MongoDB Atlas</span>
+          </div>
+        </div>
+        <div>
+          <div class="stack-group-label">Cloud & AI</div>
+          <div class="badge-row">
+            <span class="badge"><span class="dot"></span>AWS S3</span>
+            <span class="badge"><span class="dot"></span>AWS Rekognition</span>
+            <span class="badge"><span class="dot"></span>AWS Transcribe</span>
+            <span class="badge"><span class="dot"></span>AWS Lambda</span>
+            <span class="badge"><span class="dot"></span>GPT / Claude API</span>
+          </div>
+        </div>
+        <div>
+          <div class="stack-group-label">Deployment</div>
+          <div class="badge-row">
+            <span class="badge"><span class="dot"></span>Cloudflare Pages</span>
+            <span class="badge"><span class="dot"></span>Render</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- FEATURES -->
+    <section>
+      <div class="section-label reveal">What's Inside</div>
+      <h2 class="section-title reveal">10 Features That <span style="color:var(--accent)">Move the Needle</span></h2>
+      <p class="section-sub reveal">From raw recording to a full improvement roadmap — everything you need in one place.</p>
+
+      <div class="features-grid">
+        <div class="feature-card glass reveal">
+          <span class="feature-icon">📷</span>
+          <div class="feature-title">Webcam Recording</div>
+          <p class="feature-desc">Record presentations directly in your browser. No installs, no friction — just hit record and go.</p>
+        </div>
+
+        <div class="feature-card glass reveal">
+          <span class="feature-icon">🎤</span>
+          <div class="feature-title">Voice Analysis</div>
+          <p class="feature-desc">AWS Transcribe measures your clarity score, words per minute, and detects every filler word.</p>
+        </div>
+
+        <div class="feature-card glass reveal">
+          <span class="feature-icon">👁️</span>
+          <div class="feature-title">Face Analysis</div>
+          <p class="feature-desc">AWS Rekognition tracks eye contact duration and smile frequency throughout your session.</p>
+        </div>
+
+        <div class="feature-card glass reveal">
+          <span class="feature-icon">🤚</span>
+          <div class="feature-title">Gesture Recognition</div>
+          <p class="feature-desc">AI counts and evaluates your hand movements — too few or too many both affect your score.</p>
+        </div>
+
+        <div class="feature-card glass reveal">
+          <span class="feature-icon">💡</span>
+          <div class="feature-title">Confidence Scoring</div>
+          <p class="feature-desc">A composite AI-powered score blending posture, voice, and facial signals into one confidence index.</p>
+        </div>
+
+        <div class="feature-card glass reveal">
+          <span class="feature-icon">📊</span>
+          <div class="feature-title">Dashboard & Charts</div>
+          <p class="feature-desc">Chart.js-powered visual dashboards show your improvement trajectory across every metric over time.</p>
+        </div>
+
+        <div class="feature-card glass reveal">
+          <span class="feature-icon">🗂️</span>
+          <div class="feature-title">History & Reports</div>
+          <p class="feature-desc">Browse past presentations with full feedback breakdowns. Track what changed between sessions.</p>
+        </div>
+
+        <div class="feature-card glass reveal" style="border: 2px solid rgba(233,69,96,0.25);">
+          <span class="feature-new">New</span>
+          <span class="feature-icon">🎯</span>
+          <div class="feature-title">Action Plan Generator</div>
+          <p class="feature-desc">Every low score becomes a specific drill. Not "improve eye contact" — a timed, repeatable exercise.</p>
+        </div>
+
+        <div class="feature-card glass reveal" style="border: 2px solid rgba(233,69,96,0.25);">
+          <span class="feature-new">New</span>
+          <span class="feature-icon">✍️</span>
+          <div class="feature-title">Script Improver</div>
+          <p class="feature-desc">Paste your script and Claude/GPT rewrites it for clarity, flow, and audience engagement. Instantly.</p>
+        </div>
+
+        <div class="feature-card glass reveal" style="border: 2px solid rgba(233,69,96,0.25);">
+          <span class="feature-new">New</span>
+          <span class="feature-icon">📅</span>
+          <div class="feature-title">Weekly Practice Plan</div>
+          <p class="feature-desc">Your personalized 7-day improvement roadmap — built from your specific weak areas, refreshed weekly.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- LAUNCH PROGRESS -->
+    <section>
+      <div class="section-label reveal">Timeline</div>
+      <h2 class="section-title reveal">When Can You Use It?</h2>
+
+      <div class="launch-card glass reveal">
+        <div class="launch-label">Development Progress</div>
+        <div class="launch-title">Launching Summer 2026</div>
+        <div class="launch-sub">Core infrastructure complete · AI integrations in progress</div>
+
+        <div class="progress-track">
+          <div class="progress-fill"></div>
+        </div>
+        <div class="progress-labels">
+          <span>Started</span>
+          <span>Summer 2026</span>
+        </div>
+
+        <div class="progress-pct">65%</div>
+        <div class="progress-pct-label">of core features shipped</div>
+
+        <div class="milestone-row">
+          <div class="milestone done">
+            <div class="dot-check">✓</div>
+            <span>MERN Setup</span>
+          </div>
+          <div class="milestone done">
+            <div class="dot-check">✓</div>
+            <span>Webcam Recording</span>
+          </div>
+          <div class="milestone done">
+            <div class="dot-check">✓</div>
+            <span>AWS Transcribe</span>
+          </div>
+          <div class="milestone done">
+            <div class="dot-check">✓</div>
+            <span>Dashboard & Charts</span>
+          </div>
+          <div class="milestone pending">
+            <div class="dot-check"></div>
+            <span>Action Plans</span>
+          </div>
+          <div class="milestone pending">
+            <div class="dot-check"></div>
+            <span>Script Improver</span>
+          </div>
+          <div class="milestone pending">
+            <div class="dot-check"></div>
+            <span>Weekly Plans</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    Built by <strong style="color:rgba(245,245,245,0.7)">Yaswanth</strong>
+    <span class="footer-sep">·</span>
+    <a href="https://yaswanth.nxtdev.xyz" target="_blank" rel="noopener">Portfolio ↗</a>
+    <span class="footer-sep">·</span>
+    <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+    <span class="footer-sep">·</span>
+    <a href="https://linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.classList.add('visible');
+          }, 60 * (Array.from(reveals).indexOf(entry.target) % 5));
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => observer.observe(el));
+
+    // Counter animation for progress %
+    const pct = document.querySelector('.progress-pct');
+    let started = false;
+    const pctObs = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && !started) {
+        started = true;
+        let count = 0;
+        const interval = setInterval(() => {
+          count++;
+          pct.textContent = count + '%';
+          if (count >= 65) clearInterval(interval);
+        }, 22);
+      }
+    });
+    if (pct) pctObs.observe(pct);
+  </script>
+</body>
+</html>
